@@ -12,7 +12,7 @@ The trace data will be redirected to a local python webserver. The received trac
 
 Download the latest release and install the required libraries.
 ```sh
-$ pip install -r requirements.txt
+$ pip install elasticsearch
 ```
 
 After the install change the line 15 to 20 in the python script.
@@ -92,4 +92,3 @@ Here an example of the raw trace data.
   "maIp": "12.26.161.22"
 }
 ```
-
