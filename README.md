@@ -1,5 +1,7 @@
 # McAfee Active Response Tracing
 
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+
 This is an example how to consume McAfee Active Response trace data locally. Normally the trace data will be send to the McAfee Cloud and be analyzed. 
 
 However due to some restriction customers might have issues in sending the trace data to the McAfee Cloud (e.g. Air-Gapped Networks). The following guide will demonstrate how the trace data can be redirected to a local datastore. In this example Elasticsearch and Kibana is used as datastore and for visualization.
