@@ -30,7 +30,7 @@ In order to redirect the trace data the McAfee ePO Cloud Databus URL needs to be
 
 <img width="1440" alt="Screenshot 2019-09-18 at 18 11 54" src="https://user-images.githubusercontent.com/25227268/65165833-d3a34c00-da3f-11e9-90c0-7279f7418df5.png">
 
-The trace data will redirected to the configured Elasticsearch datastore. Here an example Dashboard to visualize the trace data.
+The trace data will be redirected to the configured Elasticsearch datastore. Here an example Dashboard to visualize the trace data.
 
 <img width="1440" alt="Screenshot 2019-09-18 at 18 16 02" src="https://user-images.githubusercontent.com/25227268/65166134-69d77200-da40-11e9-9551-8bfd37f06514.png">
 
