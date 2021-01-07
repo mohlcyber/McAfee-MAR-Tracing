@@ -6,19 +6,41 @@ import json
 import zlib
 import base64
 import requests
+import argparse
 
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from elasticsearch import Elasticsearch
 
 requests.packages.urllib3.disable_warnings()
 
-ELASTIC_IP = 'http://0.0.0.0:9200'
+parser = argparse.ArgumentParser()
 
-EPO_URL = 'https://0.0.0.0'
+parser.add_argument("--elasticsearch_url", "--es_url", help="Elasticsearch cluster / instance URL", required = True)
+parser.add_argument("--epo_server_url", "--epo_server", help="EPO Server URL", required = True)
+parser.add_argument("--epo_server_port", "--epo_port", help="EPO Server URL", required = False)
+parser.add_argument("--epo_username", "--epo_user", help="EPO Username", required = True)
+parser.add_argument("--epo_password", "--epo_pwd", help="EPO Password", required = True)
+
+args = parser.parse_args()
+
+args_ok = args.elasticsearch_url and args.epo_server_url and args.epo_username and args.epo_password
+
+if args_ok:
+	print('Arguments OK ! Elasticsearch URL: {}, EPO Server URL: {}, EPO Username: {}'.format(args.elasticsearch_url, args.epo_server_url, args.epo_username))
+else:
+	print("No arguments identified! Script will now terminate. Please see arguments requirements below.")
+	parser.print_help()
+	sys.exit(0)
+
+# set script main variables from passed arguments 
+ELASTIC_IP = args.elasticsearch_url
+EPO_URL = args.epo_server_url
 EPO_PORT = '8443'
-EPO_USERNAME = 'username'
-EPO_PASSWORD = 'password'
-
+if args.epo_server_port: 
+	EPO_PORT = args.epo_server_port
+	print('EPO Port set to {}'.format(EPO_PORT))
+EPO_USERNAME = args.epo_username
+EPO_PASSWORD = args.epo_password
 
 class EPO():
     def __init__(self):
