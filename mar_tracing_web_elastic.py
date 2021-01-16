@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 # #Written by mohlcyber v.0.1 18/09/2019
+# #Updated by hessyan v.0.2 16/01/2020
 
 import sys
 import json
@@ -69,8 +70,6 @@ try:
 except:
     print('Invalid Web Server Port value received, using default {}'.format(WEB_SERVER_PORT))
 
-
-
 # helper EPO class used to query properties for McAfee Agents
 
 class EPO():
@@ -78,10 +77,8 @@ class EPO():
         self.url = EPO_URL
         self.port = EPO_PORT
         self.verify = False
-
         self.user = EPO_USERNAME
         self.password = EPO_PASSWORD
-
         self.session = requests.Session()
 
     def request(self, option, **kwargs):
@@ -152,18 +149,17 @@ class Handler(BaseHTTPRequestHandler):
         self._set_response()
         self.wfile.write("Received: {}".format(self.path).encode('utf-8'))
 
-
 def run(port=WEB_SERVER_PORT):
     try:
         server_address = ('', port)    
         httpd = HTTPServer(server_address, Handler)
-        print('Starting MAR Trace Listener ({})...'.format(server_address))
+        print('Starting MAR Trace Listener Web Server ({})...'.format(server_address))
         try:
             httpd.serve_forever()
         except KeyboardInterrupt:
             pass
         httpd.server_close()
-        print('Stopping MAR Trace Listener...\n')      
+        print('Stopping MAR Trace Listener Web Server...\n')      
     except Exception as e:
         print("Error (", str(e), ") occurred. Program will now exit.")
 
