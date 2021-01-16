@@ -17,7 +17,7 @@ parser = argparse.ArgumentParser()
 
 parser.add_argument("--elasticsearch_url", "--es_url", help="Elasticsearch cluster / instance URL", required = True)
 parser.add_argument("--elasticsearch_index", "--es_index", help="Elasticsearch Index name", required = True)
-parser.add_argument("--elasticsearch_document", "--es_document", help="Elasticsearch document name", required = True)
+parser.add_argument("--elasticsearch_document", "--es_document", help="Elasticsearch Document name", required = True)
 parser.add_argument("--epo_server_url", "--epo_server", help="EPO Server URL", required = True)
 parser.add_argument("--epo_server_port", "--epo_port", help="EPO Server Port", required = False)
 parser.add_argument("--epo_username", "--epo_user", help="EPO Username", required = True)
