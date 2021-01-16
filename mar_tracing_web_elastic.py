@@ -19,7 +19,7 @@ parser.add_argument("--elasticsearch_url", "--es_url", help="Elasticsearch clust
 parser.add_argument("--elasticsearch_index", "--es_index", help="Elasticsearch Index name", required = True)
 parser.add_argument("--elasticsearch_document", "--es_document", help="Elasticsearch document name", required = True)
 parser.add_argument("--epo_server_url", "--epo_server", help="EPO Server URL", required = True)
-parser.add_argument("--epo_server_port", "--epo_port", help="EPO Server Poer", required = False)
+parser.add_argument("--epo_server_port", "--epo_port", help="EPO Server Port", required = False)
 parser.add_argument("--epo_username", "--epo_user", help="EPO Username", required = True)
 parser.add_argument("--epo_password", "--epo_pwd", help="EPO Password", required = True)
 parser.add_argument("--web_server_port", "--web_srv_port", help="Web Server Port", required = False)
