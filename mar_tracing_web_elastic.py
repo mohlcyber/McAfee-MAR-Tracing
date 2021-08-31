@@ -1,34 +1,84 @@
 #!/usr/bin/env python3
 # #Written by mohlcyber v.0.1 18/09/2019
+# #Updated by hessyan v.0.2 16/01/2020
 
 import sys
 import json
 import zlib
 import base64
 import requests
+import argparse
 
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from elasticsearch import Elasticsearch
 
 requests.packages.urllib3.disable_warnings()
 
-ELASTIC_IP = 'http://0.0.0.0:9200'
+parser = argparse.ArgumentParser()
 
-EPO_URL = 'https://0.0.0.0'
-EPO_PORT = '8443'
-EPO_USERNAME = 'username'
-EPO_PASSWORD = 'password'
+parser.add_argument("--elasticsearch_url", "--es_url", help="Elasticsearch cluster / instance URL", required = True)
+parser.add_argument("--elasticsearch_index", "--es_index", help="Elasticsearch Index name", required = True)
+parser.add_argument("--elasticsearch_document", "--es_document", help="Elasticsearch Document name", required = True)
+parser.add_argument("--epo_server_url", "--epo_server", help="EPO Server URL", required = True)
+parser.add_argument("--epo_server_port", "--epo_port", help="EPO Server Port", required = False)
+parser.add_argument("--epo_username", "--epo_user", help="EPO Username", required = True)
+parser.add_argument("--epo_password", "--epo_pwd", help="EPO Password", required = True)
+parser.add_argument("--web_server_port", "--web_srv_port", help="Web Server Port", required = False)
 
+args = parser.parse_args()
+
+# default arguments: {EPO_PORT = 8443 / WEB_SERVER_PORT = 8080}
+
+args_ok = args.elasticsearch_url and\
+args.elasticsearch_index and\
+args.elasticsearch_document and\
+args.epo_server_url and\
+args.epo_username and\
+args.epo_password
+
+if args_ok:
+        print('Required arguments OK ! Elasticsearch (URL: {} / Index: {}, Document:{}), EPO Server URL: {}, EPO Username: {}'.format(args.elasticsearch_url,args.elasticsearch_index,args.elasticsearch_document, args.epo_server_url, args.epo_username))
+else:
+        print("Not all required arguments identified! Script will now terminate. Please see arguments requirements below.")
+        parser.print_help()
+        sys.exit(0)
+
+# set script main variables from passed arguments 
+
+ELASTIC_IP = args.elasticsearch_url
+ELASTIC_INDEX = args.elasticsearch_index
+ELASTIC_DOCUMENT = args.elasticsearch_document
+EPO_URL = args.epo_server_url
+
+EPO_USERNAME = args.epo_username
+EPO_PASSWORD = args.epo_password
+
+EPO_PORT = 8443
+try:
+    if args.epo_server_port: 
+        EPO_PORT = int(args.epo_server_port)
+        print('EPO Port set to {}'.format(EPO_PORT))
+except:
+    print('Invalid EPO Port value received, using default {}'.format(EPO_PORT))
+
+WEB_SERVER_PORT = 8080
+
+try:
+    if args.web_server_port: 
+        WEB_SERVER_PORT = int(args.web_server_port)
+        print('Web Server Port set to {}'.format(WEB_SERVER_PORT))
+except:
+    print('Invalid Web Server Port value received, using default {}'.format(WEB_SERVER_PORT))
+
+# helper EPO class used to query properties for McAfee Agents
 
 class EPO():
     def __init__(self):
         self.url = EPO_URL
         self.port = EPO_PORT
         self.verify = False
-
         self.user = EPO_USERNAME
         self.password = EPO_PASSWORD
-
         self.session = requests.Session()
 
     def request(self, option, **kwargs):
@@ -50,6 +100,7 @@ class EPO():
             print('ERROR: Something went wrong in epo.request. Error: {}'.format(str(e)))
             sys.exit()
 
+# main handler class to deal with data submission to ES
 
 class BodyHandler():
     def __init__(self):
@@ -67,7 +118,6 @@ class BodyHandler():
                 dec_body = json.loads(dec_msg)
             except Exception as error:
                 return
-
             for trace in dec_body['traces']:
                 hostinfo = self.epo.request('system.find', data={'searchText': trace['maGuid']})
                 hostinfo = json.loads(hostinfo[3:])
@@ -76,7 +126,7 @@ class BodyHandler():
                     trace['maIpName'] = host['EPOComputerProperties.IPHostName']
                     trace['maIp'] = host['EPOComputerProperties.IPAddress']
 
-            res = self.es.index(index='mar', doc_type='trace', body=json.dumps(dec_body))
+            res = self.es.index(index=ELASTIC_INDEX, doc_type=ELASTIC_DOCUMENT, body=json.dumps(dec_body))
             if res['result'] == 'created':
                 print('SUCCESS: Successfull ingested new Trace Data into Elasticsearch.')
             else:
@@ -99,18 +149,19 @@ class Handler(BaseHTTPRequestHandler):
         self._set_response()
         self.wfile.write("Received: {}".format(self.path).encode('utf-8'))
 
-
-def run(port=8080):
-    server_address = ('', port)
-    httpd = HTTPServer(server_address, Handler)
-    print('Starting MAR Trace Listener...')
+def run(port=WEB_SERVER_PORT):
     try:
-        httpd.serve_forever()
-    except KeyboardInterrupt:
-        pass
-    httpd.server_close()
-    print('Stopping MAR Trace Listener...\n')
+        server_address = ('', port)    
+        httpd = HTTPServer(server_address, Handler)
+        print('Starting MAR Trace Listener Web Server ({})...'.format(server_address))
+        try:
+            httpd.serve_forever()
+        except KeyboardInterrupt:
+            pass
+        httpd.server_close()
+        print('Stopping MAR Trace Listener Web Server...\n')      
+    except Exception as e:
+        print("Error (", str(e), ") occurred. Program will now exit.")
 
-
-if __name__ == '__main__':
-    run(port=8080)
+if __name__ == '__main__':    
+    run(port=WEB_SERVER_PORT)
